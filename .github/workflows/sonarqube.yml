@@ -49,7 +49,7 @@ jobs:
       - name: Run SonarQube Analysis
         run: |
           sonar-scanner \
-            -Dsonar.projectKey=task-4 \
+            -Dsonar.projectKey=task4 \
             -Dsonar.sources=. \
             -Dsonar.host.url=http://13.235.16.154:9000 \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
