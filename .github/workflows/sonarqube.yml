@@ -33,8 +33,10 @@ jobs:
       - name: Install SonarScanner
         run: |
           sudo apt update
-          sudo apt install -y unzip
-          curl -o sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-5.0.1.3006-linux.zip
+          sudo apt install -y unzip wget
+          # Download sonarscanner correctly
+          wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-5.0.1.3006-linux.zip -O sonar-scanner.zip
+          unzip -t sonar-scanner.zip || (echo"Download failed or corruptef. Retrying..." && exit 1)
           unzip sonar-scanner.zip
           sudo mv sonar-scanner-5.0.1.3006-linux /opt/sonar-scanner
           echo "export PATH=$PATH:/opt/sonar-scanner/bin" >> $HOME/.bashrc
