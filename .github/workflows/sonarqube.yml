@@ -30,26 +30,20 @@ jobs:
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
-      - name: Install SonarScanner from APT Repository
+      - name: Install SonarScanner
         run: |
           sudo apt update
           sudo apt install -y unzip wget
-          
-          # Add SonarQube’s official repository
-          echo "deb http://apt.sonarsource.com stable main" | sudo tee /etc/apt/sources.list.d/sonarqube.list
-          wget -qO - https://apt.sonarsource.com/SonarSource.gpg.key | sudo apt-key add -
-
-          # Install SonarScanner from APT
-          sudo apt update
-          sudo apt install -y sonar-scanner
-
-          # Verify installation
-          sonar-scanner --version
+          wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-5.0.1.3006-linux.zip
+          unzip sonar-scanner-5.0.1.3006-linux.zip
+          sudo mv sonar-scanner-5.0.1.3006-linux /opt/sonar-scanner
+          echo "export PATH=$PATH:/opt/sonar-scanner/bin" >> $HOME/.bashrc
+          source $HOME/.bashrc
 
       - name: Run SonarQube Analysis
         run: |
           sonar-scanner \
-            -Dsonar.projectKey=task4 \
+            -Dsonar.projectKey=SONAR_TOKEN \
             -Dsonar.sources=. \
-            -Dsonar.host.url=http://13.235.16.154:9000 \
+            -Dsonar.host.url=http://65.2.190.24:9000 \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
