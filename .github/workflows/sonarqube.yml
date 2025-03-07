@@ -37,17 +37,13 @@ jobs:
           wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-5.0.1.3006-linux.zip
           unzip sonar-scanner-5.0.1.3006-linux.zip
           sudo mv sonar-scanner-5.0.1.3006-linux /opt/sonar-scanner
-          echo "export PATH=/opt/sonar-scanner/bin:$PATH" >> $HOME/.bashrc
-          echo "export PATH=/opt/sonar-scanner/bin:$PATH" >> $HOME/.profile
-          source $HOME/.profile
-
-      - name: Check SonarQube Status
-        run: curl -I http://65.2.190.24:9000 || (echo "SonarQube is not reachable"; exit 1)
+          echo "export PATH=$PATH:/opt/sonar-scanner/bin" >> $HOME/.bashrc
+          source $HOME/.bashrc
 
       - name: Run SonarQube Analysis
         run: |
           sonar-scanner \
-            -Dsonar.projectKey=my-devops \
+            -Dsonar.projectKey=my-docker \
             -Dsonar.sources=. \
             -Dsonar.host.url=http://65.2.190.24:9000 \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
