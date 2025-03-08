@@ -25,11 +25,14 @@ jobs:
 
       - name: Install SonarScanner
         run: |
+          sudo apt-get update && sudo apt-get install -y unzip
           mkdir -p ~/sonar-scanner
           curl -fsSL -o ~/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
-          unzip ~/sonar-scanner.zip -d ~/sonar-scanner
-          echo "export PATH=$PATH:~/sonar-scanner/sonar-scanner-5.0.1.3006-linux/bin" >> ~/.bashrc
-          source ~/.bashrc
+          unzip ~/sonar-scanner.zip -d ~/
+          echo "$HOME/sonar-scanner-5.0.1.3006-linux/bin" >> $GITHUB_PATH
+
+      - name: Verify SonarScanner Installation
+        run: sonar-scanner -v
 
       - name: Run SonarQube Scanner
         run: |
@@ -38,4 +41,3 @@ jobs:
             -Dsonar.sources=. \
             -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-
