@@ -1,0 +1,148 @@
+Integrated security scanning tools like SonarQube or OWASP ZAP into A CI/CD pipeline
+
+Plan to Complete the Task
+1.Setup Amazon Linux instance
+  *Install Git, Docker, Java, and other dependencies.
+   *Clone your GitHub repository into the instance.
+2.Install & Configure SonarQube on Amazon Linux
+   *Deploy SonarQube on the instance.
+   *Configure SonarQube token and integrate it with GitHub Actions.
+3.Modify Codebase and Push to GitHub
+   *Add a sample project to test security scanning.
+   *Push your code to GitHub.
+4.Create and Upload a GitHub Actions Workflow 
+
+*(.github/workflows/security_scan.yml)
+
+ *Configure a YAML file for GitHub Actions to trigger on push and pull_request.
+  *Integrate SonarQube security scanning.
+5.Run the Workflow and Generate a Security Report
+ *Check the pipeline execution in GitHub Actions.
+ *Verify vulnerabilities detected in SonarQube.
+ *Generate and save the report.
+
+Step 1: Setup Amazon Linux Instance
+Install Dependencies
+SSH into your Amazon Linux instance and run:
+# Update and install required packages
+sudo yum update -y
+
+# Start Docker
+sudo systemctl start docker
+sudo systemctl enable docker
+
+# Verify Git and Java installation
+git --version
+ 
+# sudo amazon-linux-extras enable corretto17
+sudo yum clean metadata
+sudo yum install -y java-17-amazon-corretto-devel
+sudo yum install -y java-17-amazon-corretto
+java -version
+
+Step 2: Install & Configure SonarQube
+Deploy SonarQube on Amazon Linux
+
+# Pull and run SonarQube Docker container
+sudo docker run -d --name sonarqube -p 9000:9000 sonarqube:lts
+
+# Wait for SonarQube to start
+sudo docker logs -f SonarQube
+
+After allow 9000 port for sonar in our instance security groups.
+
+Access SonarQube UI: http://<EC2-Public-IP>:9000/
+Default login:
+Username: admin
+Password: admin
+
+Generate a SonarQube Token (Settings → Security → Generate Token)
+
+Step 3: Clone & Push Code to GitHub
+Clone Your GitHub Repository
+# Clone your GitHub repo
+git clone https://github.com/<your-username>/<your-repo>.git
+cd <your-repo>
+
+Add a Sample Codebase for Scanning
+Inside your repo, create a sample JavaScript project or use an existing project.
+mkdir src
+echo 'console.log("Hello, Security!");' > src/index.js
+git add .
+git commit -m "Added sample project"
+git push origin main
+
+
+Step 4: Configure GitHub Secrets
+In your GitHub repository, go to Settings → Secrets and Variables → Actions and add:
+
+SONAR_TOKEN → Your SonarQube token
+SONAR_HOST_URL → http://<EC2-Public-IP>:9000/
+
+Step 5: Create GitHub Actions Workflow
+Add .github/workflows/security_scan.yml
+Inside your GitHub repo, create:
+
+name: Security Scan with SonarQube
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  sonar_scan:
+    name: SonarQube Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set Up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Install SonarScanner
+        run: |
+          sudo apt-get update && sudo apt-get install -y unzip
+          mkdir -p ~/sonar-scanner
+          curl -fsSL -o ~/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
+          unzip ~/sonar-scanner.zip -d ~/
+          echo "$HOME/sonar-scanner-5.0.1.3006-linux/bin" >> $GITHUB_PATH
+
+      - name: Verify SonarScanner Installation
+        run: sonar-scanner -v
+
+      - name: Run SonarQube Scanner
+        run: |
+          sonar-scanner \
+            -Dsonar.projectKey=my-devops-lab \
+            -Dsonar.sources=. \
+            -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+
+Step 6: Upload and Push the Workflow
+
+git add .github/workflows/security_scan.yml
+git commit -m "Added SonarQube security scan workflow"
+git push origin main
+
+Step 7: Run & Verify Security Scan
+Go to GitHub Actions (Actions tab in your repo).
+Check the SonarQube Analysis workflow execution.
+If successful, open SonarQube Dashboard and review the security findings.
+Download and save the report.
+
+
+
+
+
+
+
+
